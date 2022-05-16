@@ -1,0 +1,35 @@
+
+debug:
+  enabled: false
+
+domains:
+  - domain: ""
+    dnsChallenge:
+      enabled: true
+      domain: ""
+    ttl: 300
+    secondary: ""
+    watchedResources:
+      - test
+      - value
+    fallthrough:
+      enabled: true
+forward:
+  enabled: true
+  primary: 1.1.1.1
+  secondary: 1.0.0.1
+  options:
+    test:
+      name: abc
+      value: kkk
+extraZonePlugins: |-
+   forward . 1.1.1.1 1.0.0.1 {
+      abc kkk
+   }
+
+rbac:
+  enabled: true
+
+service:
+  type: LoadBalancer
+  port: 53

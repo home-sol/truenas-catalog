@@ -1,0 +1,27 @@
+apiVersion: v2
+appVersion: "0.3.0"
+dependencies:
+  - name: common
+    repository: file://../../../library/common/0.1.0
+    version: 0.1.0
+deprecated: false
+description: A Helm chart for the k8s_gateway CoreDNS plugin
+home: https://coredns.io/explugins/k8s_gateway/
+icon: https://truecharts.org/_static/img/appicons/k8s-gateway.png
+keywords:
+  - DNS
+  - networking
+kubeVersion: '>=1.16.0-0'
+maintainers:
+  - email: mittal.neeraj@gmail.com
+    name: Neerej Mittal
+name: k8s-gateway
+sources:
+  - https://github.com/ori-edge/k8s_gateway
+type: application
+version: 0.1.0
+annotations:
+  home-sol/catagories: |
+    - networking
+    - DNS
+  home-sol/SCALE-support: "true"

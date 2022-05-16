@@ -1,0 +1,62 @@
+---
+{{ include "common.deployment.common_config" . | nindent 0 }}
+spec: {{ include "common.deployment.common_spec" . | nindent 2 }}
+  template: {{ include "common.deployment.pod.metadata" . | nindent 4 }}
+    spec: {{ include "common.deployment.pod.spec" . | nindent 6 }}
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.registry }}/{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          args: [ "-conf", "/etc/coredns/Corefile" ]
+        {{- if .Values.secure }}
+          securityContext:
+            runAsUser: 1000
+        {{- end }}
+          volumeMounts:
+            - name: config-volume
+              mountPath: /etc/coredns
+          resources:
+          {{- toYaml .Values.resources | nindent 12 }}
+          ports:
+            - {containerPort: 1053, protocol: UDP, name: dns-udp}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+              scheme: HTTP
+            initialDelaySeconds: 60
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8181
+              scheme: HTTP
+            initialDelaySeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 5
+      volumes:
+        - name: config-volume
+          configMap:
+            name: {{ include "k8s-gateway.fullname" . }}
+            items:
+              - key: Corefile
+                path: Corefile
+            {{- if .Values.zoneFile }}
+              - key: {{ .Values.zoneFile.filename }}
+                path: {{ .Values.zoneFile.filename }}
+            {{ end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- if .Values.priorityClassName }}
+      priorityClassName: {{ .Values.priorityClassName | quote }}
+      {{- end }}
+
