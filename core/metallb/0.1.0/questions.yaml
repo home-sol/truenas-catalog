@@ -1,0 +1,108 @@
+groups:
+  - name: "Network"
+    description: "Metallb Network Configuration"
+  - name: "Monitoring"
+    description: "Monitoring Configuration"
+questions:
+  - variable: metallb
+    group: "Network"
+    label: ""
+    schema:
+      type: dict
+      additional_attrs: true
+      attrs:
+        - variable: configInline
+          label: "MetalLB Configuration"
+          schema:
+            type: dict
+            additional_attrs: true
+            attrs:
+              - variable: address-pools
+                label: "Address Pools"
+                schema:
+                  type: list
+                  default: []
+                  items:
+                    - variable: address-pools-entry
+                      group: "Address Pool"
+                      label: ""
+                      schema:
+                        additional_attrs: true
+                        type: dict
+                        attrs:
+                          - variable: name
+                            label: "Name"
+                            schema:
+                              type: string
+                              default: ""
+                              required: true
+                          - variable: protocol
+                            label: "Protocol"
+                            schema:
+                              type: string
+                              default: "layer2"
+                              hidden: true
+                          - variable: auto-assign
+                            label: "Auto Assign"
+                            description: "By default, MetalLB will allocate IPs from any configured address pool with free addresses. This might end up using “expensive” addresses for services that don’t require it."
+                            schema:
+                              type: boolean
+                              default: true
+                          - variable: addresses
+                            label: "Addresses"
+                            schema:
+                              type: list
+                              default: []
+                              items:
+                                - variable: address
+                                  label: "Address"
+                                  schema:
+                                    type: string
+                                    default: ""
+                                    required: true
+        - variable: prometheus
+          label: ""
+          schema:
+            type: dict
+            attrs:
+              - variable: enabled
+                label: "Enable Monitoring"
+                description: "Enables Prometheus Monitoring"
+                schema:
+                  type: boolean
+                  default: true
+                  show_subquestions_if: true
+                  subquestions:
+                    - variable: namespace
+                      label: "Prometheus Namespace"
+                      schema:
+                        type: string
+                        default: "ix-prometheus"
+                    - variable: serviceAccount
+                      label: "Prometheus Service Account"
+                      schema:
+                        type: string
+                        default: "prometheus"
+                    - variable: podMonitor
+                      label: ""
+                      schema:
+                        type: dict
+                        attrs:
+                          - variable: enabled
+                            label: ""
+                            schema:
+                              type: boolean
+                              default: true
+                              hidden: true
+                    - variable: prometheusRule
+                      label: ""
+                      schema:
+                        type: dict
+                        attrs:
+                          - variable: enabled
+                            label: ""
+                            schema:
+                              type: boolean
+                              default: true
+                              hidden: true
+

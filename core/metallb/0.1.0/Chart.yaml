@@ -1,0 +1,29 @@
+apiVersion: v2
+appVersion: "upstream"
+dependencies:
+  - name: metallb
+    repository: https://metallb.github.io/metallb
+    version: 0.12.1
+deprecated: false
+description: A network load-balancer implementation for Kubernetes using standard routing protocols
+home: https://github.com/home-sol/truenas-catalog/tree/main/core/metallb
+icon: https://truecharts.org/_static/img/appicons/metallb.png
+keywords:
+  - loadbalancer
+  - networking
+kubeVersion: '>=1.16.0-0'
+maintainers:
+  - email: mittal.neeraj@gmail.com
+    name: Neerej Mittal
+name: metallb
+sources:
+  - https://github.com/metallb/metallb
+  - https://metallb.universe.tf
+type: application
+version: 0.1.0
+annotations:
+  home-sol/categories: |
+    - networking
+    - loadbalancer
+    - core
+  home-sol/SCALE-support: "true"

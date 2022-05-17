@@ -1,0 +1,36 @@
+image:
+  repository: placeholder
+  # defaults to appVersion
+  tag: upstream
+  pullPolicy: IfNotPresent
+
+metallb:
+  # configInline specifies MetalLB's configuration directly, in yaml
+  # format. When configInline is used, Helm manages MetalLB's
+  # configuration ConfigMap as part of the release, and
+  # existingConfigMap is ignored.
+  #
+  # Refer to https://metallb.universe.tf/configuration/ for
+  # available options.
+  configInline:
+    address-pools:
+      - name: default
+        protocol: layer2
+        auto-assign: true
+        addresses:
+          - 192.168.2.100/28
+          - 192.168.3.100-192.168.3.105
+      - name: production
+        protocol: layer2
+        auto-assign: true
+        addresses:
+          - 192.169.2.100/28
+          - 192.169.3.100-192.169.3.105
+
+  prometheus:
+    serviceAccount: "prometheus"
+    namespace: "ix-prometheus"
+    podMonitor:
+      enabled: true
+    prometheusRule:
+      enabled: true
