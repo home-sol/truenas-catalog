@@ -1,0 +1,3 @@
+#!/usr/bin/env sh
+
+docker run --rm -v $(pwd):/catalog ixsystems/catalog_validation:latest /usr/local/bin/catalog_validate validate --path /catalog

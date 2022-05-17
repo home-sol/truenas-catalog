@@ -4,30 +4,28 @@ metadata:
   name: {{ include "common.names.fullname" . }}
   labels:
     {{- include "common.labels" . | nindent 4 }}
-    {{- with .Values.service.labels }}
-    {{- toYaml . | nindent 4 }}
-    {{- end }}
   annotations:
-    {{- with .Values.service.annotations }}
-    {{- toYaml . | nindent 4 }}
+    {{- if .Values.service.loadBalancer }}
+    {{- if .Values.service.loadBalancer.address_pool }}
+    metallb.universe.tf/address-pool: {{ .Values.service.loadBalancer.address_pool }}
+    {{- end }}
     {{- end }}
     prometheus.io/port: "9153"
     prometheus.io/scrape: "true"
 spec:
   selector:
     {{- include "common.labels.selectorLabels" . | nindent 6 }}
-  type: {{ .Values.service.type }}
-  {{- if and .Values.service.loadBalancerIP (eq .Values.service.type "LoadBalancer") }}
-  loadBalancerIP: {{ .Values.service.loadBalancerIP }}
+  type: LoadBalancer
+  {{- if .Values.service.loadBalancer }}
+  {{- if .Values.service.loadBalancer.IP }}
+  loadBalancerIP: {{ .Values.service.loadBalancer.IP }}
+  {{- end }}
   {{- end }}
   ports:
     - name: dns-udp
-      port: {{ .Values.service.port }}
+      port: 53
       protocol: UDP
       targetPort: dns-udp
-    {{- if (and (eq .Values.service.type "NodePort") (not (empty .Values.service.nodePort))) }}
-      nodePort: {{ .Values.service.nodePort }}
-    {{- end }}
   {{- if not (empty .Values.service.externalTrafficPolicy)}}
   externalTrafficPolicy: {{ .Values.service.externalTrafficPolicy }}
   {{- end }}

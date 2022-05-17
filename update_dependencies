@@ -100,7 +100,7 @@ def process_catalog_item(item_path):
 
 def update_item_version(item_name, version, version_path):
     cp = subprocess.Popen(
-        ['helm', 'dependency', 'update', version_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
+        ['helm3', 'dependency', 'update', version_path], stdout=subprocess.PIPE, stderr=subprocess.PIPE
     )
     stdout, stderr = cp.communicate()
     if cp.returncode:

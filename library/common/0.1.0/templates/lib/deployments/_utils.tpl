@@ -35,5 +35,5 @@ Retrieve common deployment configuration
 {{- define "common.deployment.common_config" -}}
 apiVersion: {{ template "common.capabilities.deployment.apiVersion" . }}
 kind: Deployment
-{{ include "common.deployment.metadata" . | nindent 0 }}
+{{- include "common.deployment.metadata" . | nindent 0 -}}
 {{- end -}}

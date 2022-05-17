@@ -11,6 +11,39 @@ Create the matchable regex from domain
 
 {{- $fqdn := ( include "common.names.fqdn" . ) }}
 
+{{- define "k8s-gateway.config.dnsChallenge" }}
+{{- if .enabled -}}
+{{- include "common.schema.validateKeys" (dict "values" . "checkKeys" (list "domain")) -}}
+template IN ANY .domain {
+  match "_acme-challenge[.](.*)[.]{{ include "k8s-gateway.configmap.regex" . }}"
+  answer {{ (printf "{{ .Name }} 5 IN CNAME {{  index .Match 1 }}.%s" .domain)  | quote}}
+  fallthrough
+}
+{{- end}}
+{{- end -}}
+
+{{- define "k8s-gateway.config.domain" -}}
+{{- include "common.schema.validateKeys" (dict "values" . "checkKeys" (list "domain")) -}}
+{{- if .dnsChallenge -}}
+{{- include "k8s-gateway.config.dnsChallenge" .dnsChallenge -}}
+{{- end }}
+k8s_gateway {{ .domain | quote}} {
+  apex {{ .apex | default .apex }}
+  ttl {{ .ttl | default 300 }}
+  {{- if .secondary }}
+  secondary {{ .secondary }}
+  {{- end }}
+  {{- if .watchedResources }}
+  resources {{ join " " .watchedResources }}
+  {{- end }}
+  {{- if .fallthrough }}
+  {{- if .fallthrough.enabled }}
+  fallthrough
+  {{- end }}
+  {{- end}}
+}
+{{- end -}}
+
 ---
 {{ include "common.configmap.common_config" . | nindent 0 }}
 data:
@@ -25,30 +58,11 @@ data:
             lameduck 5s
         }
         ready
+
         {{- range .Values.domains }}
-        {{- include "common.schema.validateKeys" (dict "values" . "checkKeys" (list "domain")) -}}
-        {{- if .dnsChallenge.enabled }}
-        {{- include "common.schema.validateKeys" (dict "values" .dnsChallenge "checkKeys" (list "domain")) -}}
-        template IN ANY .domain {
-           match "_acme-challenge[.](.*)[.]{{ include "k8s-gateway.configmap.regex" . }}"
-           answer "{{ "{{" }} .Name {{ "}}" }} 5 IN CNAME {{ "{{" }}  index .Match 1 {{ "}}" }}.{{ .dnsChallenge.domain }}"
-           fallthrough
-        }
-        {{- end }} {{/* if .dnsChallenge.enabled*/}}
-        k8s_gateway "{{ .domain }}" {
-          apex {{ .apex | default $fqdn }}
-          ttl {{ .ttl }}
-          {{- if .secondary }}
-          secondary {{ .secondary }}
-          {{- end }}
-          {{- if .watchedResources }}
-          resources {{ join " " .watchedResources }}
-          {{- end }}
-          {{- if .fallthrough.enabled }}
-          fallthrough
-          {{- end }}
-        }
+        {{- include "k8s-gateway.config.domain" (set . "apex" $fqdn) | nindent 8 }}
         {{- end }} {{/* range .Values.domains */}}
+
         {{- if .Values.forward.enabled }}
         forward . {{ .Values.forward.primary }} {{ .Values.forward.secondary }} {
           {{- range .Values.forward.options }}
